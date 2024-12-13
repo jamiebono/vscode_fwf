@@ -1,0 +1,14 @@
+Record Type,Record Identifier,Identifier Start,Identifier Length,Field Name,Start Position,Length,SQL Type,Description,Required,Default Value,Validation Pattern,Min Value,Max Value,Min Length,Max Length
+HEADER,HDR,0,3,recordType,0,3,CHAR(3),Record Type Indicator,true,HDR,^HDR$,,,3,3
+HEADER,HDR,0,3,fileDate,3,8,DATE,File Creation Date,true,,^\d{8}$,,,8,8
+HEADER,HDR,0,3,recordCount,11,6,INTEGER,Total Record Count,true,,^\d+$,0,999999,,
+DETAIL,DTL,0,3,recordType,0,3,CHAR(3),Record Type Indicator,true,DTL,^DTL$,,,3,3
+DETAIL,DTL,0,3,id,3,5,CHAR(5),Customer ID,true,,^[A-Z]{2}\d{3}$,,,5,5
+DETAIL,DTL,0,3,name,8,20,VARCHAR(20),Customer Name,true,,,,,2,20
+DETAIL,DTL,0,3,dob,28,10,DATE,Date of Birth,true,,^\d{4}-\d{2}-\d{2}$,1900-01-01,2024-12-31,,
+DETAIL,DTL,0,3,balance,38,10,DECIMAL(10,2),Account Balance,true,,,-9999.99,9999.99,,
+DETAIL,DTL,0,3,state,48,2,CHAR(2),US State Code,true,,^[A-Z]{2}$,,,2,2
+DETAIL,DTL,0,3,notes,50,50,TEXT,Additional Notes,false,,,,,,0,50
+TRAILER,TRL,0,3,recordType,0,3,CHAR(3),Record Type Indicator,true,TRL,^TRL$,,,3,3
+TRAILER,TRL,0,3,recordCount,3,6,INTEGER,Record Count,true,,^\d+$,0,999999,,
+TRAILER,TRL,0,3,totalBalance,9,12,DECIMAL(12,2),Total Balance,true,,,-99999999.99,99999999.99,,
