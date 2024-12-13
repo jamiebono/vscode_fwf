@@ -237,6 +237,207 @@ function updateDecorations(editor: vscode.TextEditor): void {
     }
 }
 
+async function addFieldFromSelectionCommand(): Promise<void> {
+    try {
+        console.log('Starting addFieldFromSelectionCommand');
+        const editor = vscode.window.activeTextEditor;
+        console.log('Active editor:', editor ? 'Found' : 'Not found');
+        console.log('Current format:', currentFormat ? 'Defined' : 'Not defined');
+
+        if (!editor) {
+            vscode.window.showErrorMessage('Please open a file first before adding a field');
+            return;
+        }
+
+        const selection = editor.selection;
+        console.log('Selection:', selection.isEmpty ? 'Empty' : `From ${selection.start.character} to ${selection.end.character}`);
+        
+        if (selection.isEmpty) {
+            vscode.window.showErrorMessage('Please select some text first');
+            return;
+        }
+
+        // Get the field name from user
+        const fieldName = await vscode.window.showInputBox({
+            prompt: 'Enter a name for this field',
+            placeHolder: 'e.g., customerName'
+        });
+        console.log('Field name entered:', fieldName || 'Cancelled');
+
+        if (!fieldName) {
+            return;
+        }
+
+        // Get the field type from user
+        const fieldType = await vscode.window.showQuickPick(
+            ['string', 'number', 'date'],
+            {
+                placeHolder: 'Select the field type'
+            }
+        );
+        console.log('Field type selected:', fieldType || 'Cancelled');
+
+        if (!fieldType) {
+            return;
+        }
+
+        // Create the new field
+        const newField = {
+            name: fieldName,
+            start: selection.start.character,
+            length: selection.end.character - selection.start.character,
+            type: fieldType as 'string' | 'number' | 'date'
+        };
+        console.log('New field created:', newField);
+
+        // If no format exists, create a new one
+        if (!currentFormat) {
+            console.log('Creating new format');
+            const detailType = {
+                name: 'DETAIL',
+                identifier: {
+                    start: 0,
+                    length: 0,
+                    value: ''
+                },
+                fields: [newField]
+            };
+
+            currentFormat = {
+                name: 'Format from Selection',
+                recordTypes: [detailType],
+                recordLength: newField.start + newField.length
+            };
+
+            updateStatusBar();
+            vscode.window.showInformationMessage('Created new format from selection');
+        } else {
+            // Add the field to the existing format
+            currentFormat.recordTypes[0].fields.push(newField);
+            console.log('Field added to existing format');
+
+            // Update record length if needed
+            const newLength = newField.start + newField.length;
+            if (newLength > currentFormat.recordLength) {
+                console.log(`Updating record length from ${currentFormat.recordLength} to ${newLength}`);
+                currentFormat.recordLength = newLength;
+            }
+        }
+
+        // Update decorations
+        updateDecorations(editor);
+        vscode.window.showInformationMessage(`Field '${fieldName}' added successfully`);
+    } catch (error) {
+        console.error('Error in addFieldFromSelectionCommand:', error);
+        const message = error instanceof Error ? error.message : 'An unknown error occurred';
+        vscode.window.showErrorMessage(`Failed to add field: ${message}`);
+    }
+}
+
+async function showFormatCommand(): Promise<void> {
+    console.log('Starting showFormatCommand');
+    if (!currentFormat) {
+        vscode.window.showErrorMessage('No format is currently defined');
+        return;
+    }
+
+    try {
+        // Create a formatted string representation of the format
+        const formatDetails = [];
+        formatDetails.push(`Format: ${currentFormat.name || 'Unnamed Format'}`);
+        formatDetails.push(`Record Length: ${currentFormat.recordLength}`);
+        
+        currentFormat.recordTypes.forEach(recordType => {
+            formatDetails.push(`\nRecord Type: ${recordType.name}`);
+            if (recordType.identifier.length > 0) {
+                formatDetails.push(`Identifier: ${recordType.identifier.value} (Start: ${recordType.identifier.start}, Length: ${recordType.identifier.length})`);
+            }
+            formatDetails.push('Fields:');
+            recordType.fields.forEach(field => {
+                const type = field.type || 'string';
+                formatDetails.push(`  - ${field.name}: Start=${field.start}, Length=${field.length}, Type=${type}`);
+            });
+        });
+
+        // Create and show the output channel
+        const channel = vscode.window.createOutputChannel('Fixed Width Format');
+        channel.clear();
+        channel.appendLine(formatDetails.join('\n'));
+        channel.show();
+        
+        console.log('Format details displayed in output channel');
+    } catch (error) {
+        console.error('Error in showFormatCommand:', error);
+        const message = error instanceof Error ? error.message : 'An unknown error occurred';
+        vscode.window.showErrorMessage(`Failed to show format: ${message}`);
+    }
+}
+
+async function exportCommand(): Promise<void> {
+    console.log('Starting exportCommand');
+    if (!currentFormat) {
+        vscode.window.showErrorMessage('No format is currently defined');
+        return;
+    }
+
+    try {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showErrorMessage('No file is open');
+            return;
+        }
+
+        // Create CSV content from the file
+        const document = editor.document;
+        const csvRows = ['Field Name,Value'];
+        
+        for (let i = 0; i < document.lineCount; i++) {
+            const line = document.lineAt(i).text;
+            if (line.trim().length === 0) continue;
+
+            currentFormat.recordTypes[0].fields.forEach(field => {
+                if (field.start + field.length <= line.length) {
+                    const value = line.substring(field.start, field.start + field.length).trim();
+                    csvRows.push(`${field.name},"${value}"`);
+                }
+            });
+
+            // Add a blank line between records
+            if (i < document.lineCount - 1) {
+                csvRows.push('');
+            }
+        }
+
+        // Get the original file name without extension
+        const originalFileName = editor.document.uri.fsPath.replace(/\.[^/.]+$/, "");
+        
+        // Create a default save path
+        const defaultUri = vscode.Uri.file(`${originalFileName}_export.csv`);
+        console.log('Default save path:', defaultUri.fsPath);
+
+        const uri = await vscode.window.showSaveDialog({
+            defaultUri,
+            filters: { 'CSV files': ['csv'] },
+            title: 'Export to CSV'
+        });
+
+        if (uri) {
+            console.log('Selected save path:', uri.fsPath);
+            await vscode.workspace.fs.writeFile(
+                uri,
+                Buffer.from(csvRows.join('\n'), 'utf8')
+            );
+            vscode.window.showInformationMessage(`File exported to ${uri.fsPath}`);
+        }
+        
+        console.log('Export completed successfully');
+    } catch (error) {
+        console.error('Error in exportCommand:', error);
+        const message = error instanceof Error ? error.message : 'An unknown error occurred';
+        vscode.window.showErrorMessage(`Failed to export file: ${message}`);
+    }
+}
+
 export function activate(context: vscode.ExtensionContext): void {
     console.log('FWF extension is now active');
 
@@ -250,7 +451,10 @@ export function activate(context: vscode.ExtensionContext): void {
         importFormatFromCsv: vscode.commands.registerCommand('vscode-fwf.importFormatFromCsv', importFormatCommand),
         exportFormatToCsv: vscode.commands.registerCommand('vscode-fwf.exportFormatToCsv', exportFormatCommand),
         saveFormat: vscode.commands.registerCommand('vscode-fwf.saveFormat', saveFormatCommand),
-        loadFormat: vscode.commands.registerCommand('vscode-fwf.loadFormat', loadFormatCommand)
+        loadFormat: vscode.commands.registerCommand('vscode-fwf.loadFormat', loadFormatCommand),
+        addFieldFromSelection: vscode.commands.registerCommand('vscode-fwf.addFieldFromSelection', addFieldFromSelectionCommand),
+        showFormat: vscode.commands.registerCommand('vscode-fwf.showFormat', showFormatCommand),
+        exportFormat: vscode.commands.registerCommand('vscode-fwf.exportFormat', exportCommand)
     };
 
     // Register event handlers

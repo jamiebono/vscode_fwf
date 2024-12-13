@@ -41,20 +41,32 @@
                 "title": "FWF: Define Format"
             },
             {
-                "command": "vscode-fwf.importFormat",
-                "title": "FWF: Import Format"
+                "command": "vscode-fwf.importFormatFromCsv",
+                "title": "FWF: Import Format from CSV"
             },
             {
-                "command": "vscode-fwf.exportFormat",
-                "title": "FWF: Export Format"
-            },
-            {
-                "command": "vscode-fwf.clearFormat",
-                "title": "FWF: Clear Format"
+                "command": "vscode-fwf.exportFormatToCsv",
+                "title": "FWF: Export Format to CSV"
             },
             {
                 "command": "vscode-fwf.showFormat",
-                "title": "FWF: Show Format"
+                "title": "FWF: Show Current Format"
+            },
+            {
+                "command": "vscode-fwf.exportFormat",
+                "title": "FWF: Export to CSV"
+            },
+            {
+                "command": "vscode-fwf.saveFormat",
+                "title": "FWF: Save Format"
+            },
+            {
+                "command": "vscode-fwf.loadFormat",
+                "title": "FWF: Load Format"
+            },
+            {
+                "command": "vscode-fwf.addFieldFromSelection",
+                "title": "FWF: Add Field from Selection"
             }
         ],
         "configuration": {
