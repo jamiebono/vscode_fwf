@@ -14,6 +14,8 @@ A Visual Studio Code extension for viewing and validating fixed-width format fil
 - 💽 SQL data type support with precision/scale
 - 📑 Multi-record format support (header/detail/trailer)
 - ✅ Record-level validation and cross-record checks
+- 🔍 Interactive field definition through text selection
+- 📋 Format inspection and visualization
 
 ## Installation
 
@@ -36,14 +38,26 @@ You can install this extension in one of two ways:
 ### Method 1: Manual Format Definition
 
 1. Open a fixed-width format file (`.fwf` or `.txt`)
-2. Press `Ctrl+Shift+P` and select "FWF: Define File Format"
+2. Press `Ctrl+Shift+P` and select "FWF: Define Format"
 3. Enter your field definitions in the format:
    ```
    fieldName,startPosition,length[,type];fieldName2,startPosition2,length2[,type2]
    ```
    Example: `id,0,5,string;name,5,20,string;date,25,8,date`
 
-### Method 2: CSV Format Import
+### Method 2: Interactive Selection
+
+1. Open your fixed-width format file
+2. Select a portion of text that represents a field
+3. Press `Ctrl+Shift+P` and select "FWF: Add Field from Selection"
+4. Enter a name for the field (e.g., "customerName")
+5. Choose the field type (string, number, or date)
+6. The field will be added to your format definition
+7. Repeat for additional fields
+
+If no format exists when you add a field through selection, a new format will be created automatically.
+
+### Method 3: CSV Format Import
 
 1. Create a CSV file with your format definition:
    ```csv
@@ -54,9 +68,17 @@ You can install this extension in one of two ways:
    DETAIL,DTL,0,3,name,8,20,VARCHAR(20),Customer Name,true,,,,,2,20
    TRAILER,TRL,0,3,recordCount,3,6,INTEGER,Record Count,true,,^\d+$,0,999999,,
    ```
-2. Press `Ctrl+Shift+P` and select "FWF: Import Format from CSV"
-3. Select your CSV file
-4. Indicate whether the file has a header row
+
+### Viewing and Managing Formats
+
+- **Show Current Format**: Press `Ctrl+Shift+P` and select "FWF: Show Current Format" to view the details of your current format definition
+- **Save Format**: Save your format for later use with "FWF: Save Format"
+- **Load Format**: Load a previously saved format with "FWF: Load Format"
+
+### Exporting Data
+
+- **Export to CSV**: Convert your fixed-width data to CSV format using "FWF: Export to CSV"
+- **Export Format**: Save your format definition to a CSV file using "FWF: Export Format to CSV"
 
 ### Multi-Record Format Support
 

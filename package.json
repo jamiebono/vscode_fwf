@@ -2,19 +2,29 @@
     "name": "vscode-fwf",
     "displayName": "Fixed Width Format Viewer",
     "description": "Extension for viewing and validating fixed-width format files",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "publisher": "jjbono",
     "private": false,
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/yourusername/vscode-fwf"
+        "url": "https://github.com/jjbono/vscode-fwf"
+    },
+    "bugs": {
+        "url": "https://github.com/jjbono/vscode-fwf/issues"
+    },
+    "homepage": "https://github.com/jjbono/vscode-fwf#readme",
+    "icon": "images/icon.png",
+    "galleryBanner": {
+        "color": "#C80000",
+        "theme": "dark"
     },
     "engines": {
         "vscode": "^1.85.0"
     },
     "categories": [
         "Programming Languages",
+        "Formatters",
         "Other"
     ],
     "keywords": [
@@ -22,10 +32,21 @@
         "flat file",
         "data viewer",
         "format viewer",
-        "text processing"
+        "text processing",
+        "data format",
+        "record format",
+        "fixed length"
     ],
     "activationEvents": [
-        "onLanguage:fwf"
+        "onLanguage:fwf",
+        "onCommand:vscode-fwf.defineFormat",
+        "onCommand:vscode-fwf.importFormatFromCsv",
+        "onCommand:vscode-fwf.exportFormatToCsv",
+        "onCommand:vscode-fwf.showFormat",
+        "onCommand:vscode-fwf.exportFormat",
+        "onCommand:vscode-fwf.saveFormat",
+        "onCommand:vscode-fwf.loadFormat",
+        "onCommand:vscode-fwf.addFieldFromSelection"
     ],
     "main": "./out/extension.js",
     "contributes": {
