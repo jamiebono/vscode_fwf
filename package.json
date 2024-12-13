@@ -38,40 +38,32 @@
         "commands": [
             {
                 "command": "vscode-fwf.defineFormat",
-                "title": "FWF: Define File Format"
+                "title": "FWF: Define Format"
             },
             {
-                "command": "vscode-fwf.importFormatFromCsv",
-                "title": "FWF: Import Format from CSV"
+                "command": "vscode-fwf.importFormat",
+                "title": "FWF: Import Format"
             },
             {
-                "command": "vscode-fwf.exportFormatToCsv",
-                "title": "FWF: Export Format to CSV"
+                "command": "vscode-fwf.exportFormat",
+                "title": "FWF: Export Format"
             },
             {
-                "command": "vscode-fwf.saveFormat",
-                "title": "FWF: Save Current Format"
+                "command": "vscode-fwf.clearFormat",
+                "title": "FWF: Clear Format"
             },
             {
-                "command": "vscode-fwf.loadFormat",
-                "title": "FWF: Load Saved Format"
-            },
-            {
-                "command": "vscode-fwf.exportToCsv",
-                "title": "FWF: Export to CSV"
-            },
-            {
-                "command": "vscode-fwf.validateFile",
-                "title": "FWF: Validate File"
+                "command": "vscode-fwf.showFormat",
+                "title": "FWF: Show Format"
             }
         ],
         "configuration": {
             "title": "Fixed Width Format",
             "properties": {
-                "fwf.savedFormats": {
+                "fwf.currentFormat": {
                     "type": "object",
-                    "default": {},
-                    "description": "Saved format definitions"
+                    "default": null,
+                    "description": "Current format definition"
                 }
             }
         }
@@ -83,9 +75,7 @@
         "pretest": "npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
         "test": "jest --coverage",
-        "test:unit": "jest --testPathPattern=src/__tests__/unit",
-        "test:integration": "jest --testPathPattern=src/__tests__/integration",
-        "test:e2e": "node ./out/test/runTest.js"
+        "package": "vsce package"
     },
     "devDependencies": {
         "@types/vscode": "^1.85.0",
